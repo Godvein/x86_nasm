@@ -18,10 +18,10 @@ clear_screen:
 	ret
 
 fps_delay:
-	mov ah, 0x86
-	mov cx, 0
-	mov dx, 33333
-	int 0x15
+	mov ah, 0x86 ;bios wait function
+	mov cx, 0 ;high word
+	mov dx, 33333 ;low word 33ms
+	int 0x15 ;interrupt for bios delay
 	ret	
 draw_ball:
 	mov di, 0 ;x offset
