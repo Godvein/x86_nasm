@@ -1,5 +1,12 @@
 org 0x7c00
 start:
+	call clear_screen
+	call draw_ball
+	add byte [ball_x], 1
+	call fps_delay
+	jmp start
+	
+clear_screen:
 	mov ah, 0x00 ;set videomode
 	mov al, 0x13 ;set videomode 320x200 
 	int 0x10 ;interrupt to set video mode
@@ -8,9 +15,14 @@ start:
 	mov bh, 0x00 ;function code
 	mov bl, 0x00 ;background color black
 	int 0x10 ;interupt to set background
-	
-	call draw_ball
+	ret
 
+fps_delay:
+	mov ah, 0x86
+	mov cx, 0
+	mov dx, 33333
+	int 0x15
+	ret	
 draw_ball:
 	mov di, 0 ;x offset
 	mov si, 0 ;y offset
