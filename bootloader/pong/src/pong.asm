@@ -5,10 +5,66 @@ start:
 	call draw_ball
 	call ball_move
 	call check_ball_collision
+	call check_input
+	call player_move
 	call draw_player
 	call fps_delay
 	jmp start
 
+player_move:
+	mov byte al, [input_buffer] ;get the player input
+	cmp al, "w" ;check if w
+	je move_up ;move up if w
+
+	cmp al, "s" ;check if s
+	je move_down ;move down if s
+
+	ret
+
+move_up:
+	mov bx, [player_y] ;get player y position
+	cmp bx, [player_height] ;check if player_y is above player_height
+	jl return ;return if less than 0
+
+	;execute if player_y is more than 0	
+	mov cx, [player_velocity] ;get player velocity
+	sub bx, cx ;subtract player y to move up
+	mov [player_y], bx ;move the updated y position to memory
+	xor cl, cl ;fill cl with 0
+	mov [input_buffer], cl ;reset input_buffer to 0
+	ret	
+	
+move_down:
+	mov bx, [player_y] ;get player y position
+	mov dx, [window_height] ;get window height
+	sub dx, [player_height] ;subtract window height with player height
+	cmp bx, dx ;check if player y is above the max
+	jg return ;return if greater than max
+
+	;execute if lower than max
+	mov cx, [player_velocity] ;get player velocity
+	add bx, cx ;add player y to move down
+	mov [player_y], bx ;move the updated y position to memory
+	xor cl, cl ;fill cl with 0
+	mov [input_buffer], cl ;reset input_buffer to 0
+	ret
+	
+return:
+	ret
+	
+check_input:
+	mov ah, 0x01 ;function to get input status
+	int 0x16 ;interrupt to execute keyboard service
+
+	jz no_input ;zero flag set if no input
+
+	mov ah, 0x00 ;function to get the input key if input status is true
+	int 0x16 ;interrupt to execute keyboard service
+	mov [input_buffer], al ;store the key value in memory
+
+no_input:
+	ret
+	
 draw_player:
 	
 	mov di, 0 ;x offset
@@ -28,14 +84,14 @@ draw_player_x:
 	
 	int 0x10 ;interrupt to draw pixel
 	
-	cmp di, [player_width] ;compare x to ball size 
+	cmp di, [player_width] ;compare x to player size 
 	inc di ;increase x offset
 	jb draw_player_x ;jump if less than or equal to 0
 
 draw_player_y:
 	mov di, 0 ;reset x offset
 	inc si ;increase y offset
-	cmp si, [player_height] ;compare y to ball size
+	cmp si, [player_height] ;compare y to player size
 	jb draw_player_x ;jump if less than or equal to 0
 	ret 
 	
@@ -136,7 +192,7 @@ ball_y:
 	dw 0x000a ;ball position y
 	
 ball_size:
-	dw 0x0005 ;ball size
+	dw 0x0004 ;ball size
 	
 ball_velocity_x:
 	dw 0x0003 ;ball velocity x
@@ -145,10 +201,10 @@ ball_velocity_y:
 	dw 0x0002 ;ball velocity y	
 	
 window_width:
-	dw 0x0140 ;320 in decimal
+	dw 0x012c ;300 in decimal (idk why but setting it to 320 doesnt work for drawing the ball while moving)
 	
 window_height:
-	dw 0x00c8 ;200 in deximal (320x200) window
+	dw 0x00c8 ;200 in deximal (300x200) window
 
 player_x:
 	dw 0x0000 ;player position x
@@ -161,5 +217,11 @@ player_width:
 
 player_height:
 	dw 0x000f ;player height
+
+player_velocity:
+	dw 0x000a ;player velocity
+
+input_buffer:
+	resb 1
 times 510-($-$$) db 0
 db 0x55,0xaa
