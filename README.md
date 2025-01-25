@@ -18,6 +18,6 @@ This repository is dedicated to exploring x86 assembly programming using NASM. I
     ```bash
 	cd bootloader/pong   # Replace with your program directory
 	make                 # Assembles the program
-	qemu-system-i386 -drive format=raw, file=build/pong.img # Runs the program (using QEMU or similar emulator)
+	qemu-system-i386 -drive format=raw,file=build/pong.img # Runs the program (using QEMU or similar emulator)
 
 
