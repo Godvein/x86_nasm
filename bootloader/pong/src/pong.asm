@@ -2,13 +2,44 @@ org 0x7c00
 bits 16
 start:
 	call clear_screen
-	call ball_move
-	call check_collision
 	call draw_ball
+	call ball_move
+	call check_ball_collision
+	call draw_player
 	call fps_delay
 	jmp start
 
-check_collision:
+draw_player:
+	
+	mov di, 0 ;x offset
+	mov si, 0 ;y offset
+	
+draw_player_x:
+	
+	mov ah, 0x0c ;draw pixel function
+	mov al, 0x0f ;color white
+	mov bh, 0 ;page number
+
+	mov cx, [player_x] ; x position 
+	mov dx, [player_y] ; y position	
+	
+	add cx, di ;add x offset
+	add dx, si ;add y offset
+	
+	int 0x10 ;interrupt to draw pixel
+	
+	cmp di, [player_width] ;compare x to ball size 
+	inc di ;increase x offset
+	jb draw_player_x ;jump if less than or equal to 0
+
+draw_player_y:
+	mov di, 0 ;reset x offset
+	inc si ;increase y offset
+	cmp si, [player_height] ;compare y to ball size
+	jb draw_player_x ;jump if less than or equal to 0
+	ret 
+	
+check_ball_collision:
 	mov ax, [ball_x] ;contains ball position x
 	mov bx, [ball_y] ;contains ball position y
 	
@@ -75,7 +106,7 @@ draw_ball:
 draw_ball_x:
 	
 	mov ah, 0x0c ;draw pixel function
-	mov al, 0x0f ;color whilte
+	mov al, 0x0f ;color white
 	mov bh, 0 ;page number
 
 	mov cx, [ball_x] ; x position 
@@ -119,5 +150,16 @@ window_width:
 window_height:
 	dw 0x00c8 ;200 in deximal (320x200) window
 
+player_x:
+	dw 0x0000 ;player position x
+
+player_y:
+	dw 0x0000 ;player position y
+
+player_width:
+	dw 0x0005 ;player width
+
+player_height:
+	dw 0x000f ;player height
 times 510-($-$$) db 0
 db 0x55,0xaa
