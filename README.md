@@ -14,10 +14,10 @@ This repository is dedicated to exploring x86 assembly programming using NASM. I
 2. To run any program in the repository:
 - Navitage to the directory of the program you want to run
 - Use the provided Makefile to build and run the program
-For example:
+- For example:
     ```bash
-	cd pong_bootloader   # Replace with your program directory
+	cd bootloader/pong   # Replace with your program directory
 	make                 # Assembles the program
-	qemu-system-i386 -drive format=raw, file=build/".imgfile" # Runs the program (using QEMU or similar emulator)
+	qemu-system-i386 -drive format=raw,file=build/pong.img # Runs the program (using QEMU or similar emulator)
 
 
