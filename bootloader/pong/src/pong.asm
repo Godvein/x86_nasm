@@ -8,9 +8,46 @@ start:
 	call check_input
 	call player_move
 	call draw_player
+	call check_player_collision
 	call fps_delay
 	jmp start
 
+check_player_collision:
+	;AABB collision detection
+
+	mov ax, [ball_x] ;get ball x position
+	mov bx, [ball_y] ;get ball y position
+	
+	mov cx, [player_x] ;get player x position
+	mov dx, [player_y] ;get player y position
+
+	;check collision
+	add ax, [ball_size] ;ball_x + ball_size
+	cmp ax, cx ;if ax < player_x
+	jle no_collision ;no collision
+	
+	sub ax, [ball_size] ;get ball x position
+	add cx, [player_width] ;player_x + player_width	
+	cmp ax, cx ;if ball_x > cx
+	jge no_collision ;no collision
+
+	sub cx, [player_width] ;get player x position
+	add bx, [ball_size] ;ball_y + ball_size
+	cmp bx, dx ;if bx < player_y
+	jle no_collision ;no collision
+	
+	sub bx, [ball_size] ;get ball y position
+	add dx, [player_height] ;player_y + player_height
+	cmp bx, dx ;if ball_y > dx
+	jge no_collision ;no collision
+
+	;if collision change ball velocity x and y
+	jmp operation_x
+	jmp operation_y
+	ret	
+
+no_collision:
+	ret
 player_move:
 	mov byte al, [input_buffer] ;get the player input
 	cmp al, "w" ;check if w
@@ -195,10 +232,10 @@ ball_size:
 	dw 0x0004 ;ball size
 	
 ball_velocity_x:
-	dw 0x0003 ;ball velocity x
+	dw 0x0005 ;ball velocity x
 
 ball_velocity_y:
-	dw 0x0002 ;ball velocity y	
+	dw 0x0003 ;ball velocity y	
 	
 window_width:
 	dw 0x012c ;300 in decimal (idk why but setting it to 320 doesnt work for drawing the ball while moving)
