@@ -136,8 +136,8 @@ check_ball_collision:
 	mov ax, [ball_x] ;contains ball position x
 	mov bx, [ball_y] ;contains ball position y
 	
-	cmp ax, [ball_size] ;check if minimum ball x position
-	jl operation_x ;make ball x positive
+	cmp ax, 0 ;check if ball is less than 0 which means the game is over
+	jl game_over ;game over if ball x is less than 0
 
 	cmp bx, [ball_size] ;check if mininum ball y position
 	jl operation_y ;make ball y positive
@@ -155,7 +155,29 @@ check_ball_collision:
 	jg operation_y ;make ball y negative
 
 	ret
+	
+game_over:
+	mov ax, 0x03 ;switch to text mode
+	int 0x10 ;interrupt
+	lea si, [game_over_text] ;move address of text
+print_loop:
+	mov ah, 0x0e ;teletype output
+	mov al, [si] ;move first byte of the text to al
+	mov bh, 0 ;page number
+	mov bl, 0x0f ;white color
+	int 0x10 ;interrupt to write
+	
+	inc si ;move to the next byte of text
+	cmp al, 0 ;check for null pointer
+	je pause ;jump to pause if 0
+	
+	jmp print_loop ;keep the loop going
+pause:
+	mov ah, 0x00 ;wait for key press
+	int 0x16 ;interrupt to read key press
 
+
+		
 operation_x:
 	mov cx, [ball_velocity_x] ;get ball x velocity
 	neg cx ;this will make x veloity negative or positive 
@@ -189,7 +211,7 @@ clear_screen:
 fps_delay:
 	mov ah, 0x86 ;bios wait function
 	mov cx, 0 ;high word
-	mov dx, 33333 ;low word 33ms
+	mov dx, 16667 ;low word 16.67ms (60 fps)
 	int 0x15 ;interrupt for bios delay
 	ret	
 draw_ball:
@@ -260,5 +282,9 @@ player_velocity:
 
 input_buffer:
 	resb 1
+
+game_over_text:
+	dw 'GA', 'ME', ' O', 'VE', 'R ', 'PR', 'ES', 'S ', 'AN', 'Y ', 'KE', 'Y ', 'TO' , ' C', 'ON', 'TI', 'NU', 'E ', 0 ;game over text
+	
 times 510-($-$$) db 0
 db 0x55,0xaa
